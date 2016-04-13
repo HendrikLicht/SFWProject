@@ -14,6 +14,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 
 public class Server 
@@ -33,7 +34,7 @@ public class Server
 		this.indexArticles();
 	}
 	
-	public void runServer() throws IOException
+	public void runServer() throws IOException, URISyntaxException
 	{
 
 		
@@ -116,13 +117,45 @@ public class Server
 			for (int n = 0; n < foundUri.size(); n++)
 			{
 				System.out.println("SERVER: searchtext: URI's: " + foundUri.get(n));
+				serializeURI(foundUri.get(n));
+				
 			}
 			
 			//TODO URIList serialisieren & senden damit der client sie öffenen kann
 		}
 		
-		socket.close(); //TODO
+		//socket.close(); //TODO
 
+	}
+	
+	public void serializeURI(URI uri)
+	{
+		try 
+		{
+			System.out.println("SERVER: serializeURI: serialzing: " + uri);
+			try
+			{
+			socket.getOutputStream().flush();
+			}
+			catch (Exception e)
+			{
+				System.out.println("SERVER: can't flush, Socket is closed");
+			}
+			ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());
+			objectOut.writeObject(uri);
+			objectOut.flush();
+			//objectOut.close();
+			socket.getOutputStream().flush();
+			socket.getOutputStream().close();
+			socket.close();
+			
+		} 
+		
+		catch (IOException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void indexArticles()
@@ -206,7 +239,15 @@ public class Server
 					{
 						System.out.println("SERVER: searchText: found: " + articleSearchIndex.get(n).chapters.get(m).get(o) + " in Article: " + articleSearchIndex.get(n).htmlDoc);
 						System.out.println("SERVER: searchText: found: in chapter " + m);
-						uri.add(articleSearchIndex.get(n).htmlDoc);//TODO
+						if (uri.contains(articleSearchIndex.get(n).htmlDoc))
+						{
+							
+						}
+						else
+						{
+							uri.add(articleSearchIndex.get(n).htmlDoc);//TODO
+						}
+						
 					}
 		
 					else

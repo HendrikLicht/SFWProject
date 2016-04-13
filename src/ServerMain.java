@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 
 public class ServerMain {
@@ -13,6 +14,9 @@ public class ServerMain {
 		try {
 			server.runServer();
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
