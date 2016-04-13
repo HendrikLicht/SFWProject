@@ -1,6 +1,8 @@
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 import org.apache.commons.*;
@@ -46,6 +48,7 @@ public class Server
 				//System.out.println(objectInput.readObject());
 				System.out.println("SERVER: tick...");
 				this.resolveCommand(command);
+				//objectInput.close();
 				//serverSocket.close(); //TODO diese u nd folgende zeile entfernen dafür servercommand auflösungsmethode einfügen
 				//createServerSocket(); //
 			} 
@@ -59,6 +62,11 @@ public class Server
 			{
 			
 				e.printStackTrace();
+			}
+			
+			finally
+			{
+				socket.close();
 			}
 		}
 	}
@@ -84,20 +92,37 @@ public class Server
 	
 	}
 	
-	public void resolveCommand(String command)
+	public void resolveCommand(String command) throws IOException
 	{
 		if (command.equals("crashMe"))
 		{
+			System.out.println("CLIENT: command = " + command);
 			this.crashServer();
 		}
 		else if (command.equals("ping"))
 		{
+			System.out.println("CLIENT: command = " + command);
 			System.out.println("pong");
+		}
+		else if (command.equals("hello"))
+		{
+			System.out.println("CLIENT: command = " + command);
+			System.out.println("Client says hello!");
 		}
 		else
 		{
-			this.searchText(command);
+			System.out.println("CLIENT: command = " + command);
+			ArrayList<URI> foundUri = new ArrayList<URI>(this.searchText(command));
+			for (int n = 0; n < foundUri.size(); n++)
+			{
+				System.out.println("SERVER: searchtext: URI's: " + foundUri.get(n));
+			}
+			
+			//TODO URIList serialisieren & senden damit der client sie öffenen kann
 		}
+		
+		socket.close(); //TODO
+
 	}
 	
 	public void indexArticles()
@@ -148,6 +173,7 @@ public class Server
 	public void crashServer()
 	{
 		System.out.println(this.voidVar);
+		System.exit(0);
 	}
 	
 	public void searchTag(String keyWord)
@@ -193,6 +219,24 @@ public class Server
 			}
 		}
 		return uri;
+	}
+	
+	public void serializeURIList(ArrayList<URI> list)
+	{
+		try 
+		{
+			//TODO Methode einbinden & Adresse des Clients beschhaffen
+			OutputStream os = socket.getOutputStream();
+			ObjectOutputStream objectOut = new ObjectOutputStream(os);
+			objectOut.writeObject(list);
+			objectOut.flush();
+			objectOut.close();
+		} 
+		catch (IOException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
