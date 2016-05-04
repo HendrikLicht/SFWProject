@@ -15,6 +15,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 
 
 public class Server 
@@ -28,12 +29,29 @@ public class Server
 	int port = 80;
 	int voidVar;
 	
+	ServerUI ui;
+	
 	
 	public Server()
 	{
 		this.indexArticles();
+		createUI();
 	}
 	
+	public void createUI()
+	{
+		ui = new ServerUI();
+		ui.yellow();
+		try 
+		{
+			ui.setAdressLbl(InetAddress.getLocalHost(), this.port);
+		} 
+		catch (UnknownHostException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	public void runServer() throws IOException, URISyntaxException
 	{
 
@@ -43,15 +61,11 @@ public class Server
 			try 
 			{
 				socket = serverSocket.accept();
+				ui.green();
 				ObjectInputStream objectInput = new ObjectInputStream(socket.getInputStream());
-				//System.out.println(socket.getInputStream().read());
 				String command = (String) objectInput.readObject();
-				//System.out.println(objectInput.readObject());
 				System.out.println("SERVER: tick...");
 				this.resolveCommand(command);
-				//objectInput.close();
-				//serverSocket.close(); //TODO diese u nd folgende zeile entfernen dafür servercommand auflösungsmethode einfügen
-				//createServerSocket(); //
 			} 
 			
 			catch (IOException e) 
@@ -68,6 +82,7 @@ public class Server
 			finally
 			{
 				socket.close();
+				ui.yellow();
 			}
 		}
 	}
@@ -109,6 +124,10 @@ public class Server
 		{
 			System.out.println("CLIENT: command = " + command);
 			System.out.println("Client says hello!");
+			System.out.println("SERVER: attempting to answer...");
+			serializeString("Server says hello back!");
+			System.out.println("SERVER: said hello back!");
+			
 		}
 		else
 		{
@@ -121,11 +140,37 @@ public class Server
 				
 			}
 			
-			//TODO URIList serialisieren & senden damit der client sie öffenen kann
 		}
-		
-		//socket.close(); //TODO
 
+	}
+	
+	public void serializeString(String string)
+	{
+		try 
+		{
+			System.out.println("SERVER: serializeString: serialzing: " + string);
+			try
+			{
+			socket.getOutputStream().flush();
+			}
+			catch (Exception e)
+			{
+				System.out.println("SERVER: can't flush, Socket is closed");
+			}
+			ObjectOutputStream objectOut = new ObjectOutputStream(socket.getOutputStream());
+			objectOut.writeObject(string);
+			objectOut.flush();
+			//objectOut.close();
+			socket.getOutputStream().flush();
+			socket.getOutputStream().close();
+			socket.close();
+			
+		} 
+		
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	public void serializeURI(URI uri)
@@ -153,7 +198,6 @@ public class Server
 		
 		catch (IOException e) 
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -164,14 +208,12 @@ public class Server
 		{
 			System.out.println("indexArticles: loop: " + n);
 			String fileExtension = FilenameUtils.getExtension(listOfFiles[n].getName());
-			//System.out.println(fileExtension);	//TODO TestMethode
 			if (fileExtension.equals("html"))
 			{
 				System.out.println("SERVER_FILEREADER " + listOfFiles[n].getName());
 				System.out.println("SERVER_FILEREADER " + listOfFiles[n].getPath());
-				Article bufferedArticle = new Article(listOfFiles[n].getPath()); //TODO change test for relative ArticleNAme
+				Article bufferedArticle = new Article(listOfFiles[n].getPath());
 				articleSearchIndex.add(bufferedArticle);
-				//System.out.println(articleSearchIndex);	//TODO TestMethode
 				
 			}
 			else
@@ -197,7 +239,7 @@ public class Server
 
 			else
 			{
-				//System.out.println("SERVER: searchTest: found nothing");
+
 			}
 		}
 
@@ -221,7 +263,7 @@ public class Server
 
 			else
 			{
-				//System.out.println("SERVER: searchTest: found nothing");
+
 			}
 		}
 	}
@@ -245,14 +287,14 @@ public class Server
 						}
 						else
 						{
-							uri.add(articleSearchIndex.get(n).htmlDoc);//TODO
+							uri.add(articleSearchIndex.get(n).htmlDoc);
 						}
 						
 					}
 		
 					else
 					{
-						//System.out.println("SERVER: searchTest: found: nothing");
+
 					}
 					
 					
@@ -266,7 +308,6 @@ public class Server
 	{
 		try 
 		{
-			//TODO Methode einbinden & Adresse des Clients beschhaffen
 			OutputStream os = socket.getOutputStream();
 			ObjectOutputStream objectOut = new ObjectOutputStream(os);
 			objectOut.writeObject(list);
@@ -275,7 +316,6 @@ public class Server
 		} 
 		catch (IOException e) 
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
