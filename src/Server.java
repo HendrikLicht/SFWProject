@@ -191,8 +191,8 @@ public class Server
 			objectOut.flush();
 			//objectOut.close();
 			socket.getOutputStream().flush();
-			socket.getOutputStream().close();
-			socket.close();
+			//socket.getOutputStream().close(); //TODO sockets closen
+			//socket.close();
 			
 		} 
 		
