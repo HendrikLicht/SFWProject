@@ -133,12 +133,10 @@ public class Server
 		{
 			System.out.println("CLIENT: command = " + command);
 			ArrayList<URI> foundUri = new ArrayList<URI>(this.searchText(command));
-			for (int n = 0; n < foundUri.size(); n++)
-			{
-				System.out.println("SERVER: searchtext: URI's: " + foundUri.get(n));
-				serializeURI(foundUri.get(n));
+
+				System.out.println("SERVER: serializing foundUri");
+				serializeURIList(foundUri);
 				
-			}
 			
 		}
 
